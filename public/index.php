@@ -12,6 +12,7 @@ $s3Client = new Aws\S3\S3Client([
         'secret' => 'WuqjOj4VdkhOLaspUPYIa1HHPNzvtKXvWyogGzIW'
     ]
 ]);
+dump($s3Client->listBuckets());die;
 
 $result = $s3Client->putObject([
     'Bucket' => 'jonathans3',
