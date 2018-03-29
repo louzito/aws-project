@@ -1,0 +1,11 @@
+{
+    "name": "aws-project/aws-project",
+    "description": "Projet AWS project de Jonathan Deleray, Lou Zito",
+    "authors": [
+        {
+            "name": "Lou Zito",
+            "email": "zito.lou@gmail.com"
+        }
+    ],
+    "require": {}
+}
