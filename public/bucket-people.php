@@ -1,8 +1,44 @@
 <?php
 
 require dirname(__DIR__) . '/vendor/autoload.php';
-$personnes = json_decode(file_get_contents('personne.json'));
+require dirname(__DIR__) . '/config/config.php';
 
+use Aws\Rekognition\RekognitionClient;
+
+if (isset($_GET['page'])) {
+    $page = $_GET['page'];
+} else {
+    $page = 1;
+}
+
+$s3Client = new Aws\S3\S3Client([
+    'version'     => 'latest',
+    'region'      => 'eu-west-3',
+    'credentials' => [
+        'key'    => $config['key'],
+        'secret' => $config['secret']
+    ]
+]);
+
+$result = $s3Client->listObjects(array(
+    'Bucket' => 'jonathans3'
+));
+
+$nbPage = floor(count($result['Contents'])/10);
+
+$peopleImg = [];
+
+foreach ($result['Contents'] as $key => $img) {
+    if ($key >= ($page*10-10) && $key < ($page*10)) {
+        if (strpos($img['Key'], 'photos/') !== false) {
+            $resultObj = $s3Client->getObject([
+                'Bucket' => 'jonathans3',
+                'Key'    => $img['Key']
+            ]);
+            $peopleImg[] = $resultObj['@metadata']['effectiveUri'];
+        }
+    }
+}
 ?>
 <!doctype html>
 <html lang="fr">
@@ -12,7 +48,7 @@ $personnes = json_decode(file_get_contents('personne.json'));
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-    <title>Compare personne</title>
+    <title>Identifier personne</title>
     <style>
         #result-detect-face, form {
             margin: 20px;
@@ -39,7 +75,6 @@ $personnes = json_decode(file_get_contents('personne.json'));
             display: inline-block;
             vertical-align: top;
         }
-        .user-to-save .form-container p { padding-left: 15px; display: inline-block; }
         nav {
             text-align: center;
         }
@@ -58,6 +93,10 @@ $personnes = json_decode(file_get_contents('personne.json'));
         nav a:hover {
             background: #101fff;
         }
+        .pagination {
+            text-align: center;
+            padding-left: 20px 0;
+        }
     </style>
 </head>
 <body>
@@ -68,31 +107,39 @@ $personnes = json_decode(file_get_contents('personne.json'));
     <a href="compare-people.php" title="">Comparer personnes</a>
 </nav>
 <div id="result-detect-face">
-    <?php if (isset($personnes)) { ?>
-        <?php foreach ($personnes as $pers) { ?>
+    <?php if (isset($peopleImg)) { ?>
+        <?php foreach($peopleImg as $key => $pi) { ?>
             <div class="user-to-save">
                 <div class="img-container">
-                    <img src="<?php echo $pers->image; ?>">
+                    <img src="<?php echo $pi; ?>">
                 </div>
                 <div class="form-container">
-                    <p class="prenom"><?php echo $pers->prenom; ?></p>
-                    <input type="submit" class="delete-face" value="Supprimer">
+                    <input type="hidden" name="image" class="image" value="<?php echo $pi; ?>">
+                    <input type="text" name="prenom" class="prenom">
+                    <input type="submit" class="save-face" value="Enregistrer">
                 </div>
             </div>
         <?php } ?>
     <?php } ?>
 </div>
+<div class="pagination">
+    <p>Pages</p>
+    <?php for($i = 1; $i <= $nbPage; $i++) : ?>
+    <a href="bucket-people.php?page=<?php echo $i; ?>" class="<?php echo ($page == $i) ? "current-page" : "" ; ?>"><?php echo $i; ?></a>
+    <?php endfor; ?>
+</div>
 <script>
-    $('.delete-face').click(function(e) {
+    $('.save-face').click(function(e) {
         var userToSaveElt = $(this).closest('.user-to-save');
 
         var params = {
-            'prenom' : $(userToSaveElt).find('.prenom').html()
+            'image' : $(userToSaveElt).find('.image').val(),
+            'prenom' : $(userToSaveElt).find('.prenom').val()
         };
 
         $.ajax({
             type: "POST",
-            url: 'delete-people.php',
+            url: 'ajax-save-face-from-bucket.php',
             data: params,
             success: function (retour) {
                 $(userToSaveElt).remove();
@@ -102,3 +149,4 @@ $personnes = json_decode(file_get_contents('personne.json'));
 </script>
 </body>
 </html>
+

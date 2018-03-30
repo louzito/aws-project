@@ -127,6 +127,7 @@ if (isset($_POST) && isset($_FILES['image'])) {
 </head>
 <body>
 <nav>
+    <a href="bucket-people.php" title="Bucket personnes">Bucket personnes</a>
     <a href="index.php" title="Ajouter personnes">Ajouter personnes</a>
     <a href="show-people.php" title="Ajouter personnes">Voir personnes</a>
     <a href="compare-people.php" title="">Comparer personnes</a>
