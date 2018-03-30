@@ -95,7 +95,7 @@ foreach ($result['Contents'] as $key => $img) {
         }
         .pagination {
             text-align: center;
-            padding-left: 20px 0;
+            padding: 20px 0;
         }
     </style>
 </head>

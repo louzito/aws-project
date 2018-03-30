@@ -63,15 +63,20 @@ if (isset($_POST) && isset($_FILES['image'])) {
             $image2 = fread($cmpImg2, filesize($personne->image));
             fclose($cmpImg2);
 
-            $result = $rekognition->compareFaces([
-                'SimilarityThreshold' => 50.0,
-                'SourceImage' => [
-                    'Bytes' => $image1,
-                ],
-                'TargetImage' => [
-                    'Bytes' => $image2,
-                ],
-            ]);
+            try {
+                $result = $rekognition->compareFaces([
+                    'SimilarityThreshold' => 50.0,
+                    'SourceImage' => [
+                        'Bytes' => $image1,
+                    ],
+                    'TargetImage' => [
+                        'Bytes' => $image2,
+                    ],
+                ]);
+            } catch (Exception $e) {
+//                $e->getMessage();
+            }
+
             if (count($result['FaceMatches']) > 0 && $result['FaceMatches'][0]["Similarity"] > 50 && $result['FaceMatches'][0]["Similarity"] > $prevSimilarity) {
                 $prevSimilarity = $result['FaceMatches'][0]["Similarity"];
                 $personneTrouver = $personne->prenom;
