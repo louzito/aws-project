@@ -65,7 +65,7 @@ if (isset($_POST) && isset($_FILES['image'])) {
 
             try {
                 $result = $rekognition->compareFaces([
-                    'SimilarityThreshold' => 70.0,
+                    'SimilarityThreshold' => 50.0,
                     'SourceImage' => [
                         'Bytes' => $image1,
                     ],
@@ -77,7 +77,7 @@ if (isset($_POST) && isset($_FILES['image'])) {
 //                $e->getMessage();
             }
 
-            if (isset($result['FaceMatches']) && is_array($result['FaceMatches']) && count($result['FaceMatches']) > 0 && $result['FaceMatches'][0]["Similarity"] > 70 && $result['FaceMatches'][0]["Similarity"] > $prevSimilarity) {
+            if (isset($result['FaceMatches']) && is_array($result['FaceMatches']) && count($result['FaceMatches']) > 0 && $result['FaceMatches'][0]["Similarity"] > 50 && $result['FaceMatches'][0]["Similarity"] > $prevSimilarity) {
                 $prevSimilarity = $result['FaceMatches'][0]["Similarity"];
                 $personneTrouver = $personne->prenom;
             }
