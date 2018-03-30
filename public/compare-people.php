@@ -77,7 +77,7 @@ if (isset($_POST) && isset($_FILES['image'])) {
 //                $e->getMessage();
             }
 
-            if (count($result['FaceMatches']) > 0 && $result['FaceMatches'][0]["Similarity"] > 70 && $result['FaceMatches'][0]["Similarity"] > $prevSimilarity) {
+            if (isset($result['FaceMatches']) && count($result['FaceMatches']) > 0 && $result['FaceMatches'][0]["Similarity"] > 70 && $result['FaceMatches'][0]["Similarity"] > $prevSimilarity) {
                 $prevSimilarity = $result['FaceMatches'][0]["Similarity"];
                 $personneTrouver = $personne->prenom;
             }
